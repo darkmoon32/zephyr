@@ -69,10 +69,10 @@ static enum clock_control_status clock_control_esp32_get_status(const struct dev
 static int clock_control_esp32_on(const struct device *dev, clock_control_subsys_t sys)
 {
 	enum clock_control_status status = clock_control_esp32_get_status(dev, sys);
-
+	LOG_DBG("Clock %s status %d", dev->name, status);
 	if (status == CLOCK_CONTROL_STATUS_ON) {
 		return -EALREADY;
-	}
+	};
 
 	periph_module_enable((periph_module_t)sys);
 

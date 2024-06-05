@@ -1,0 +1,254 @@
+/*
+ * Copyright (c) 2023 Espressif Systems (Shanghai) Co., Ltd.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+/dts-v1/;
+
+#include <espressif/esp32/esp32_wroom_32ue_n16.dtsi>
+#include "espink-pinctrl.dtsi"
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	model = "Laskakit espink PROCPU";
+	compatible = "laskakit,espink";
+
+	aliases {
+		uart-0 = &uart0;
+		i2c-0 = &i2c0;
+		sw0 = &button_home;
+		watchdog0 = &wdt0;
+		led0 = &green_led;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		green_led: led_1 {
+			gpios = <&gpio0 27 GPIO_ACTIVE_HIGH>;
+			label = "User led";
+		};
+	};
+
+	buttons: buttons {
+		compatible = "gpio-keys";
+		button_home: button_home {
+			gpios = <&gpio0 25 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;
+			label = "Home btn";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+
+		button_host: button_host {
+			gpios = <&gpio0 26 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;
+			label = "Host btn";
+			zephyr,code = <INPUT_KEY_1>;
+		};
+	};
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		#if 0
+		zephyr,display = &uc8179_waveshare_epaper_gdew075t7;
+		#endif
+	};
+};
+
+&uart0 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-names = "default";
+};
+
+&uart1 {
+	current-speed = <115200>;
+	pinctrl-0 = <&uart1_default>;
+	pinctrl-names = "default";
+	status = "disabled";
+};
+
+&uart2 {
+	current-speed = <115200>;
+	pinctrl-0 = <&uart2_default>;
+	pinctrl-names = "default";
+	status = "disabled";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&gpio1 {
+	status = "okay";
+};
+
+&i2c0 {
+	status = "disabled";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	sda-gpios = <&gpio0 21 GPIO_OPEN_DRAIN>;
+	scl-gpios = <&gpio0 22 GPIO_OPEN_DRAIN>;
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-names = "default";
+};
+
+&spi2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "disabled";
+	pinctrl-0 = <&spim2_default>;
+	pinctrl-names = "default";
+};
+
+&spi3 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	pinctrl-0 = <&spim3_default>;
+	pinctrl-names = "default";
+#if 1
+	uc8179_waveshare_epaper_gdew075t7: uc8179@0 {
+		compatible = "gooddisplay,gdew075t7", "ultrachip,uc8179";
+		spi-max-frequency = <4000000>;
+		reg = <0>;
+		width = <800>;
+		height = <480>;
+		/*enable-gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;*/
+		dc-gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;		/* D9 */
+		reset-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;	/* D8 */
+		busy-gpios = <&gpio0 4 GPIO_ACTIVE_LOW>;	/* D7 */
+
+		softstart = [17 17 28 17];
+
+		full {
+			pwr = [07 07 3f 3f 03];
+			cdi = <07>;
+			tcon = <22>;
+		};
+
+		partial {
+			pwr = [07 07 3f 3f 03];
+			cdi = <07>;
+			pll = <06>;
+			tcon = <22>;
+			vdcs = <00>;
+#if 0
+			lutc = [
+				00 0A 00 00 00 01
+				60 14 14 00 00 01
+				00 14 00 00 00 01
+				00 13 0A 01 00 01
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+			];
+
+			lutww = [
+				40 0A 00 00 00 01
+				90 14 14 00 00 01
+				10 14 0A 00 00 01
+				A0 13 01 00 00 01
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+			];
+
+			lutkw = [
+				40 0A 00 00 00 01
+				90 14 14 00 00 01
+				00 14 0A 00 00 01
+				99 0C 01 03 04 01
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+			];
+
+			lutwk = [
+				40 0A 00 00 00 01
+				90 14 14 00 00 01
+				00 14 0A 00 00 01
+				99 0B 04 04 01 01
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+			];
+
+			lutkk = [
+				80 0A 00 00 00 01
+				90 14 14 00 00 01
+				20 14 0A 00 00 01
+				50 13 01 00 00 01
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+				00 00 00 00 00 00
+			];
+#endif
+		};
+	};
+#endif
+};
+
+&timer0 {
+	status = "disabled";
+};
+
+&timer1 {
+	status = "disabled";
+};
+
+&timer2 {
+	status = "disabled";
+};
+
+&timer3 {
+	status = "disabled";
+};
+
+&trng0 {
+	status = "okay";
+};
+
+&psram0 {
+	status = "disabled";
+};
+
+&flash0 {
+	status = "okay";
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/* Reserve 60kB for the bootloader */
+		boot_partition: partition@1000 {
+			label = "mcuboot";
+			reg = <0x00001000 0x0000F000>;
+			read-only;
+		};
+
+		/* Reserve 1024kB for the application in slot 0 */
+		slot0_partition: partition@10000 {
+			label = "image-0";
+			reg = <0x00010000 0x00100000>;
+		};
+
+		/* Reserve 1024kB for the application in slot 1 */
+		slot1_partition: partition@110000 {
+			label = "image-1";
+			reg = <0x00110000 0x00100000>;
+		};
+
+		/* Reserve 256kB for the scratch partition */
+		scratch_partition: partition@210000 {
+			   label = "image-scratch";
+			   reg = <0x00210000 0x00040000>;
+		};
+
+		storage_partition: partition@250000 {
+			label = "storage";
+			reg = <0x00250000 0x00006000>;
+		};
+	};
+};

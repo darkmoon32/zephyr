@@ -1,0 +1,5 @@
+board:
+  name: espink
+  vendor: laskakit
+  socs:
+  - name: esp32
